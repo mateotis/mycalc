@@ -7,15 +7,27 @@
 
 using namespace std;
 
-void tokenise(string infix) {
-	vector<string> operands;
-	vector<string> operators;
+
+vector<string> tokenise(string infix) {
+	vector<string> exp;
 
 	string operand = "";
 	string op = ""; // "operator" is not a valid variable name, sadly
 
 	int i = 0;
 	while(i < infix.length() - 1) {
+		while((infix.at(i) == '(') || (infix.at(i) == ')')) {
+			string paren(1, infix.at(i)); // Since parantheses can only be one character each, we can safely convert them to string
+			exp.push_back(paren);
+			//cout << paren << " is parantheses." << endl;
+			if(i < infix.length() - 1) { // Boundary check
+				i++;
+			}
+			else {
+				break;
+			}
+		}
+
 		while(isdigit(infix.at(i)) == true) { // All the digits that are next to each other make one number
 			operand += infix.at(i); // Operands and operators are tokenised into strings
 			if(i < infix.length() - 1) { // Boundary check
@@ -25,39 +37,59 @@ void tokenise(string infix) {
 				break;
 			}
 		}
-		cout << operand << " is a number." << endl;
-		operands.push_back(operand);
+		if(operand != "") { // To avoid pushing empty values into the vector
+			//cout << operand << " is a number." << endl;
+			exp.push_back(operand);
+		}
 		operand = "";
 
-		while(isdigit(infix.at(i)) == false) { // Covers multi-character operators
-			op += infix.at(i);
-			if(i < infix.length() - 1) {
+		while(isdigit(infix.at(i)) == false && infix.at(i) != '(' && infix.at(i) != ')') { // Covers multi-character operators
+			if(infix.at(i) == '-' && isdigit(infix.at(i-1)) == false && isdigit(infix.at(i+1)) == true) {  // This handles - as a negative marker which should be part of an operand
+				operand += infix.at(i);
 				i++;
+				while(isdigit(infix.at(i)) == true) {
+					operand += infix.at(i); // Operands and operators are tokenised into strings
+					if(i < infix.length() - 1) { // Boundary check
+						i++;
+					}
+					else {
+						break;
+					}					
+				}
+				if(operand != "") {
+					exp.push_back(op);
+					operand = "";				
+				}
+
 			}
 			else {
-				break;
+				op += infix.at(i);
+				if(i < infix.length() - 1) {
+					i++;
+				}
+				else {
+					break;
+				}
 			}
 		}
-		cout << op << " is an operator." << endl;
-		operators.push_back(op);
+		
+		if(op != "") {
+			//cout << op << " is an operator." << endl;
+			exp.push_back(op);			
+		}
 		op = "";
 	}
 
-	operands.erase(operands.begin()); // Hack but it gets rid of the weird empty elements that make it into these vectors
-	operators.pop_back();
-
-	for(int i = 0; i < operands.size(); i++) {
-		cout << operands.at(i) << " ";
-	}
-	cout << endl;
-	for(int i = 0; i < operators.size(); i++) {
-		cout << operators.at(i) << " ";
-	}
+	return exp;
 }
 
 int main() {
-	//char ops = {'+', '-', '*', '/', '%', '//'}
 
-	string infix = "--12//34+56-78";
-	tokenise(infix);
+	string infix = "120//(343+(546-781*5))";
+	vector<string> expression = tokenise(infix);
+
+	for(int i = 0; i < expression.size(); i++) {
+		cout << expression.at(i);
+	}
+	cout << endl;
 }
