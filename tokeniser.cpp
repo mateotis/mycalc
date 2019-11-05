@@ -4,6 +4,7 @@
 #include<stack>
 #include<ctype.h>
 #include<vector>
+#include<fstream>
 
 using namespace std;
 
@@ -110,13 +111,70 @@ vector<string> tokenise(string infix) {
 	return exp;
 }
 
+struct Expression {
+	string name;
+	string exp;
+	float ans;
+	bool isEval;
+	//Expression() : ans(0), isEval(false) {}
+};
+
 int main() {
 
+	vector<Expression> expressions;
+	ifstream fin("file3.txt");
+
+	if (fin.is_open()) {
+		string line;
+		int lineCount = 0;
+		while(getline(fin, line)) {
+			lineCount++;
+			//cout << line << endl;
+			string expName = "";
+			string expValue = "";
+			int nameEnd = line.find("=");
+			int valueEnd = line.find(";");
+
+			if(valueEnd != string::npos && line.at(line.length() - 2) == ' ' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
+
+				//cout << nameEnd << endl;
+				for(int i = 0; i < nameEnd - 1; i++) { // Parses variable names
+					expName += line.at(i);
+				}
+				//cout << expName << endl;
+
+				for(int j = nameEnd + 2; j < valueEnd - 1; j++) { // Parses expression
+					expValue += line.at(j);
+				}
+				//cout << expValue << endl;
+				Expression expr1 = {expName, expValue, 0, false};
+				expressions.push_back(expr1);
+				//cout << expr1.name << ", " << expr1.exp << ", " << expr1.ans << ", " << expr1.isEval << endl;
+
+				expName = "";
+				expValue = "";
+				if (fin.eof()) {
+					break; // Prevents duplication of last line
+				}
+			}
+			else {
+				cout << "Invalid syntax on line " << lineCount << "." << endl;
+			}
+
+
+		}
+	}
+	fin.close();
+
+	for(int i = 0; i < expressions.size(); i++) {
+		cout << expressions[i].name << " = " << expressions[i].exp << endl;
+	}
+
 	string infix = "--120//((--343)+(546-781*(**5)))";
-	vector<string> expression = tokenise(infix);
+/*	vector<string> expression = tokenise(infix);
 
 	for(int i = 0; i < expression.size(); i++) {
 		cout << expression.at(i);
 	}
-	cout << endl;
+	cout << endl;*/
 }
