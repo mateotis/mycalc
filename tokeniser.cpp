@@ -4,6 +4,7 @@
 #include<stack>
 #include<ctype.h>
 #include<vector>
+#include<algorithm>
 #include<fstream>
 
 using namespace std;
@@ -40,7 +41,7 @@ vector<string> tokenise(string infix) {
 			}
 			else if(var != "") {
 				var += elem;
-				exp.push_back(operand); 
+				exp.push_back(var); 
 				return exp; 
 			}
 			else { // If it's none of these, it's a parentheses
@@ -52,13 +53,13 @@ vector<string> tokenise(string infix) {
 
 		// Otherwise, we head into tokenisation...
 		if(isspace(elem)) { // Filtering out whitespace
-			cout << i << " is a space." << endl;
+			//cout << i << " is a space." << endl;
 			if(i < infix.length() - 1) { i++; continue; }
 			else { break; }			
 		}
 		
 		else if(elem == '(' || elem == ')') { // Parentheses
-			cout << i << " is a parentheses." << endl;
+			//cout << i << " is a parentheses." << endl;
 			string paren(1, elem);
 			exp.push_back(paren);
 			if(i < infix.length() - 1) { i++; continue; }
@@ -66,7 +67,7 @@ vector<string> tokenise(string infix) {
 		}
 
 		else if(isalpha(elem)) { // Variables
-			cout << i << " is a variable." << endl;
+			//cout << i << " is a variable." << endl;
 			var += elem;
 			if(isalpha(infix.at(i+1)) == 0) {
 				exp.push_back(var);
@@ -77,7 +78,7 @@ vector<string> tokenise(string infix) {
 		}
 
 		else if(isdigit(elem)) { // Numbers
-			cout << i << " is a number." << endl;
+			//cout << i << " is a number." << endl;
 			operand += elem;
 			if(isdigit(infix.at(i+1)) == 0) {
 				exp.push_back(operand);
@@ -89,7 +90,7 @@ vector<string> tokenise(string infix) {
 
 		else { // Operators of all kinds
 			if(elem == '-' && infix.at(i+1) == '-') { // Edge case for --
-				cout << i << " is a -- operator." << endl;
+				//cout << i << " is a -- operator." << endl;
 				exp.push_back("--");
 				if(i < infix.length() - 2) { i = i + 2; continue; }
 				else { break; }				
@@ -97,13 +98,13 @@ vector<string> tokenise(string infix) {
 			else if(i == 0 && elem == '-' && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // Edge case for a negative number at the start (avoids the i-1 checks)
 				if(isdigit(infix.at(i+1))) {
 					operand += elem;
-					cout << i << " is a negative number." << endl;
+					//cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
 					var += elem;
-					cout << i << " is a negative variable." << endl;
+					//cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}				
@@ -111,20 +112,20 @@ vector<string> tokenise(string infix) {
 			else if(i != 0 && elem == '-' && isdigit(infix.at(i-1)) == 0 && isalpha(infix.at(i-1)) == 0 && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // When - is a negative marker instead of an operator
 				if(isdigit(infix.at(i+1))) {
 					operand += elem;
-					cout << i << " is a negative number." << endl;
+					//cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
 					var += elem;
-					cout << i << " is a negative variable." << endl;
+					//cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 			}
 			else { // All other operators
 				op += elem;
-				cout << i << " is an operator." << endl;
+				//cout << i << " is an operator." << endl;
 				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || infix.at(i+1) == '(' || infix.at(i+1) == ')') {
 					exp.push_back(op);
 					op = "";
@@ -150,7 +151,7 @@ struct Expression {
 int main() {
 
 	vector<Expression> expressions;
-	ifstream fin("file1.txt");
+	ifstream fin("file2.txt");
 
 	if (fin.is_open()) {
 		string line;
@@ -162,22 +163,20 @@ int main() {
 			string expValue = "";
 			int nameEnd = line.find("=");
 			int valueEnd = line.find(";");
+			int leftParNum = count(line.begin(), line.end(), '('); // Since we'll check whether the parantheses are properly paired
+			int rightParNum = count(line.begin(), line.end(), ')');
 
-			if(valueEnd != string::npos && line.at(line.length() - 2) == ' ' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
-				// TODO: Add check for equal number of left and right parantheses
-				//cout << nameEnd << endl;
+			if(valueEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
 				for(int i = 0; i < nameEnd - 1; i++) { // Parses variable names
 					expName += line.at(i);
 				}
-				//cout << expName << endl;
 
 				for(int j = nameEnd + 2; j < valueEnd - 1; j++) { // Parses expression
 					expValue += line.at(j);
 				}
-				//cout << expValue << endl;
+
 				Expression expr1 = {expName, expValue, 0, false};
 				expressions.push_back(expr1);
-				//cout << expr1.name << ", " << expr1.exp << ", " << expr1.ans << ", " << expr1.isEval << endl;
 
 				expName = "";
 				expValue = "";
@@ -198,11 +197,6 @@ int main() {
 		cout << expressions[i].exp << endl;
 	}
 
-	//string infix = "1+2+3+4";
-	//vector<string> expression = tokenise(infix);
-
-
-
  	for(int i = 0; i < expressions.size(); i++) {
  		Expression expToTokenise = expressions.at(i);
  		vector<string> tokenisedExp = tokenise(expToTokenise.exp);
@@ -214,8 +208,4 @@ int main() {
 		cout << endl;
  	}
 
-/*	for(int i = 0; i < expression.size(); i++) {
-		cout << expression.at(i);
-	}*/
-	cout << endl;
 }
