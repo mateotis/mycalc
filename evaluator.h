@@ -6,3 +6,4 @@
 #include<vector>
 
 float evaluate(std::vector<std::string>);
+bool isUnary(string op);
