@@ -25,11 +25,12 @@ struct Expression {
 int main() {
 
 	vector<Expression> expressions;
+	vector<string> invExps; // A vector to store the invalid expression names
 	ifstream fin("file2.txt");
 
 	if (fin.is_open()) {
 		string line;
-		int lineCount = 0;
+		int lineCount = 1;
 		while(getline(fin, line)) {
 			lineCount++;
 			//cout << line << endl;
@@ -58,14 +59,31 @@ int main() {
 					break; // Prevents duplication of last line
 				}
 			}
-			else {
-				cout << "Invalid syntax on line " << lineCount << ". Expression will not be evaluated." << endl;
+			else { // We add the names of invalid expressions to a separate vector to cross-check with our expressions list later
+				string invExpName = "";
+				int i = 0;
+				while(isalpha(line.at(i))) {
+					invExpName += line.at(i);
+					i++;
+				}
+				invExps.push_back(invExpName);
+				cout << "Invalid syntax on line " << lineCount << " for expression " << invExpName << ". Expression will not be evaluated." << endl;
 			}
 
 
 		}
 	}
 	fin.close();
+
+	for(int i = 0; i < invExps.size(); i++) { // Cleans out expressions that rely on invalid expressions
+		for(int j = 0; j < expressions.size(); j++) {
+			string expE = expressions.at(j).exp;
+			if(expE.find(invExps.at(i)) != string::npos) {
+				cout << "Expression " << expressions.at(j).name << " relies on an invalid expression. It will not be evaluated." << endl;
+				expressions.erase(expressions.begin() + j);
+			}
+		}
+	}
 
 	for(int i = 0; i < expressions.size(); i++) {
 		cout << expressions[i].exp << endl;
@@ -75,17 +93,19 @@ int main() {
  		Expression expToTokenise = expressions.at(i);
  		vector<string> tokenisedExp = tokenise(expToTokenise.exp);
 
- 		//cout << "EXPRESSION IS: ";
+ 		cout << "TOKENISED EXPRESSION IS: ";
 	 	for(int i = 0; i < tokenisedExp.size(); i++) {
-			//cout << tokenisedExp.at(i) << ',';
+			cout << tokenisedExp.at(i) << ',';
 		}
 		cout << endl;
 
  		vector<string> postfixExp = infix2postfix(tokenisedExp);
 
+ 		cout << "POSTFIX IS: ";
  		for(int i = 0; i < postfixExp.size(); i++) {
- 			cout << postfixExp.at(i);	
+ 			cout << postfixExp.at(i) << ",";	
  		}
+ 		cout << endl;
  	}
 
 }

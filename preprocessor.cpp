@@ -150,6 +150,12 @@ vector<string> tokenise(string infix) {
 			else { // All other operators
 				op += elem;
 				//cout << i << " is an operator." << endl;
+/*				if(op.length() > 2) {
+					string unaryOp = op.substr(op.length() - 2);
+					exp.push_back(unaryOp)
+					exp.push_back(op);
+					op = "";					
+				}*/
 				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || infix.at(i+1) == '(' || infix.at(i+1) == ')') {
 					exp.push_back(op);
 					op = "";
