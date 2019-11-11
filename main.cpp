@@ -8,21 +8,38 @@
 #include<vector>
 #include<algorithm>
 #include<fstream>
+#include<sstream>
 
 #include "preprocessor.h"
 #include "evaluator.h"
 
 using namespace std;
 
-int main() {
+int main(int argc, char* args[]) {
+
+	string inputFile;
+	string outputFile = ""; // Initialised as empty string to later check if we have to print to terminal
+
+	for(int i = 0; i < argc; i++) {
+		string str(args[i]);
+		if (str == "-i") {
+			string inputFileStr(args[i+1]); // The parameter after -i is the input file name
+			inputFile = inputFileStr; // Since inputFileStr is only valid within the loop
+		}
+
+		if (str == "-o") {
+			string outputFileStr(args[i+1]); // Same for the output
+			outputFile += outputFileStr;
+		}
+	}
 
 	vector<Expression> expressions;
 	vector<string> invExps; // A vector to store the invalid expression names
-	ifstream fin("file4.txt");
+	ifstream fin(inputFile);
 
 	if (fin.is_open()) {
 		string line;
-		int lineCount = 1;
+		int lineCount = 0;
 		while(getline(fin, line)) {
 			cout << line << endl;
 			lineCount++;
@@ -31,24 +48,10 @@ int main() {
 			string expValue = "";
 			int nameEnd = line.find("=");
 			int valueEnd = line.find(";");
-			int leftParNum = count(line.begin(), line.end(), '('); // Since we'll check whether the parantheses are properly paired
+			int leftParNum = count(line.begin(), line.end(), '('); // Since we'll check whether the parentheses are properly paired
 			int rightParNum = count(line.begin(), line.end(), ')');
 
-			if(valueEnd == string::npos) {
-				cout << "no equal sign" << endl;
-			}
-			if(leftParNum != rightParNum) {
-				cout << "unequal brackets" << endl;
-			}
-			if(line.at(line.length() - 2) != ' ') {
-				cout << "no space before the end" << endl;
-			}
-			if(line.at(nameEnd-1) != ' ' && line.at(nameEnd+1) != ' ') {
-				cout << "no spaces between the equal sign" << endl;
-			}
-
-
-			if(valueEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.back() == ';' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
+			if(valueEnd != string::npos && nameEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.back() == ';' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
 				for(int i = 0; i < nameEnd - 1; i++) { // Parses variable names
 					expName += line.at(i);
 				}
@@ -76,13 +79,25 @@ int main() {
 					i++;
 				}
 				invExps.push_back(invExpName);
-				cout << "Invalid syntax on line " << lineCount << " for expression " << invExpName << ". Expression will not be evaluated." << endl;
+
+				cout << "Invalid syntax on line " << lineCount << " for expression " << invExpName << ". Expression will not be evaluated. Reason for error: ";
+
+				if(nameEnd == string::npos) { cout << "no equal sign." << endl; }
+				else if(leftParNum != rightParNum) { cout << "unequal brackets." << endl; }
+				else if(line.at(line.length() - 2) != ' ') { cout << "no space before the semicolon." << endl; }
+				else if(line.at(nameEnd-1) != ' ' || line.at(nameEnd+1) != ' ') { cout << "no spaces between the equal sign." << endl; }
+				else if(line.back() != ';' || valueEnd == string::npos) { cout << "no semicolon at end or at all." << endl; }
+
 			}
 
 
 		}
+		fin.close();
 	}
-	fin.close();
+
+	if(expressions.size() == 0) { // If we have no valid expressions, we just stop
+		return EXIT_SUCCESS;
+	}
 
 	for(int i = 0; i < invExps.size(); i++) { // Cleans out expressions that rely on invalid expressions
 		for(int j = 0; j < expressions.size(); j++) {
@@ -132,18 +147,36 @@ int main() {
  		}*/
 
  		//cout << exp.name << " evaluation status main is " << exp.isEval << endl;
- 		cout << endl;
+ 		//cout << endl;
  		i++;
  		if(i == expressions.size()) { // If we reach the end of our list once and there are still expressions left to evaluate, run the loop again
  			i = 0;
  		}
  	}
 
- 	for(int i = 0; i < expressions.size(); i++) {
- 		Expression& exp = expressions.at(i);
- 		cout << exp.name << " = " << exp.ans << endl;
+ 	if(outputFile != "") { // If we have an output file, write results to it
+	 	ofstream fout(outputFile);
+	 	if(fout.is_open()) {
+		  	for(int i = 0; i < expressions.size(); i++) {
+		 		Expression& exp = expressions.at(i);
+		 		ostringstream ansSS; // A stringstream is the best way to cast a float to string (to_string leaves too many zeros)
+		 		ansSS << exp.ans;
+		 		string ansString(ansSS.str());
+		 		string line = exp.name + " = " + ansString +"\n"; // Proper formatting of line
+		 		fout << line;
+		 	}
+		 	fout.close();
+	 	}
+ 	}
+ 	else { // If not, just print them on the terminal
+	  	for(int i = 0; i < expressions.size(); i++) {
+	 		Expression& exp = expressions.at(i);
+	 		ostringstream ansSS;
+	 		ansSS << exp.ans;
+	 		string ansString(ansSS.str());
+	 		cout << exp.name << " = " << exp.ans << endl;
+ 		}	
  	}
 
-
-
+ 	return EXIT_SUCCESS;
 }

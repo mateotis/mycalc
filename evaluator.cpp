@@ -29,7 +29,7 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 						if(expressions.at(j).isEval == true) { // If the variable we need is already calculated, we can use it
 							float fElem = expressions.at(j).ans;
 							myStack.push(fElem);
-							cout << fElem << " is the value of variable " << expressions.at(j).name << endl;
+							//cout << fElem << " is the value of variable " << expressions.at(j).name << endl;
 						}
 						else { // If it's not, we can't evaluate this expression for now
 							return;
@@ -39,6 +39,7 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 			}
 			else {
 			//convert string into float element
+				cout << "Element to convert: " << elem << endl;
 				float fElem = stof(elem);
 				myStack.push(fElem);
 			}

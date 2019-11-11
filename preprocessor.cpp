@@ -121,13 +121,15 @@ vector<string> tokenise(string infix) {
 			}
 			else if(i == 0 && elem == '-' && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // Edge case for a negative number at the start (avoids the i-1 checks)
 				if(isdigit(infix.at(i+1))) {
-					operand += elem;
+					exp.push_back("-");
+					//operand += elem;
 					//cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
-					var += elem;
+					exp.push_back("-");
+					//var += elem;
 					//cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
@@ -135,13 +137,15 @@ vector<string> tokenise(string infix) {
 			}
 			else if(i != 0 && elem == '-' && isdigit(infix.at(i-1)) == 0 && isalpha(infix.at(i-1)) == 0 && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // When - is a negative marker instead of an operator
 				if(isdigit(infix.at(i+1))) {
-					operand += elem;
+					exp.push_back("-");
+					//operand += elem;
 					//cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
-					var += elem;
+					exp.push_back("-");
+					//var += elem;
 					//cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
