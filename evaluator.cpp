@@ -11,14 +11,11 @@ using namespace std;
 
 void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	//Method which will evaluate a PostfixExpression and return the result
 {	
-	for(int i = 0; i < expressions.size(); i++) {
+/*	for(int i = 0; i < expressions.size(); i++) {
 		cout << expressions.at(i).name << " eval status is " << expressions.at(i).isEval << endl;
-	}
+	}*/
 	stack <float> myStack;				//1. Create a stack of type float to store the operands
 
-	if(exp.isEval == true) { // If it's already evaluated, we don't have to evaluate it again
-		return;
-	}
 	//2.	Scan the POSTFIX expression from left to right for every element
 	for(int i = 0; i < exp.postfix.size(); i++) {
 		string elem = exp.postfix.at(i);

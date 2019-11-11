@@ -18,7 +18,7 @@ int main() {
 
 	vector<Expression> expressions;
 	vector<string> invExps; // A vector to store the invalid expression names
-	ifstream fin("file5.txt");
+	ifstream fin("file4.txt");
 
 	if (fin.is_open()) {
 		string line;
@@ -98,10 +98,8 @@ int main() {
 		cout << expressions[i].exp << endl;
 	}
 
-	int expCount = expressions.size();
-	int i = 0;
- 	while(expCount > 0) { // Runs until all expressions are evaluated
- 		Expression& exp = expressions.at(i);
+	for(int l = 0; l < expressions.size(); l++) { // Tokenises every expression and converts them to postfix
+ 		Expression& exp = expressions.at(l);
  		//Expression expToTokenise = expressions.at(i);
  		exp.tokens = tokenise(exp.exp);
 
@@ -118,13 +116,34 @@ int main() {
  			cout << exp.postfix.at(k) << ",";	
  		}
  		cout << endl;
+ 	}
 
+	int expCount = expressions.size();
+	int i = 0;
+ 	while(expCount > 0) { // Runs until all expressions are evaluated
+		Expression& exp = expressions.at(i);
 		//cout << exp.name << " evaluation status in main is " << exp.isEval << endl;
- 		evaluate(exp, expressions, expCount);
- 		cout << "The answer is " << exp.ans << endl;
+ 		if(exp.isEval == false) {
+  			evaluate(exp, expressions, expCount);
+ 		}
+ 			
+/* 		if(exp.isEval == true) {
+ 			cout << "The answer is " << exp.ans << endl;
+ 		}*/
+
  		//cout << exp.name << " evaluation status main is " << exp.isEval << endl;
  		cout << endl;
  		i++;
+ 		if(i == expressions.size()) { // If we reach the end of our list once and there are still expressions left to evaluate, run the loop again
+ 			i = 0;
+ 		}
  	}
+
+ 	for(int i = 0; i < expressions.size(); i++) {
+ 		Expression& exp = expressions.at(i);
+ 		cout << exp.name << " = " << exp.ans << endl;
+ 	}
+
+
 
 }
