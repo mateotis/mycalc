@@ -14,24 +14,17 @@
 
 using namespace std;
 
-struct Expression {
-	string name;
-	string exp;
-	float ans;
-	bool isEval;
-	//Expression() : ans(0), isEval(false) {}
-};
-
 int main() {
 
 	vector<Expression> expressions;
 	vector<string> invExps; // A vector to store the invalid expression names
-	ifstream fin("file2.txt");
+	ifstream fin("file5.txt");
 
 	if (fin.is_open()) {
 		string line;
 		int lineCount = 1;
 		while(getline(fin, line)) {
+			cout << line << endl;
 			lineCount++;
 			//cout << line << endl;
 			string expName = "";
@@ -41,7 +34,21 @@ int main() {
 			int leftParNum = count(line.begin(), line.end(), '('); // Since we'll check whether the parantheses are properly paired
 			int rightParNum = count(line.begin(), line.end(), ')');
 
-			if(valueEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
+			if(valueEnd == string::npos) {
+				cout << "no equal sign" << endl;
+			}
+			if(leftParNum != rightParNum) {
+				cout << "unequal brackets" << endl;
+			}
+			if(line.at(line.length() - 2) != ' ') {
+				cout << "no space before the end" << endl;
+			}
+			if(line.at(nameEnd-1) != ' ' && line.at(nameEnd+1) != ' ') {
+				cout << "no spaces between the equal sign" << endl;
+			}
+
+
+			if(valueEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.back() == ';' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
 				for(int i = 0; i < nameEnd - 1; i++) { // Parses variable names
 					expName += line.at(i);
 				}
@@ -50,7 +57,9 @@ int main() {
 					expValue += line.at(j);
 				}
 
-				Expression expr1 = {expName, expValue, 0, false};
+				vector<string> startingTokens;
+				vector<string> startingPostfix;
+				Expression expr1 = {expName, expValue, startingTokens, startingPostfix, 0, false};
 				expressions.push_back(expr1);
 
 				expName = "";
@@ -89,23 +98,33 @@ int main() {
 		cout << expressions[i].exp << endl;
 	}
 
- 	for(int i = 0; i < expressions.size(); i++) {
- 		Expression expToTokenise = expressions.at(i);
- 		vector<string> tokenisedExp = tokenise(expToTokenise.exp);
+	int expCount = expressions.size();
+	int i = 0;
+ 	while(expCount > 0) { // Runs until all expressions are evaluated
+ 		Expression& exp = expressions.at(i);
+ 		//Expression expToTokenise = expressions.at(i);
+ 		exp.tokens = tokenise(exp.exp);
 
  		cout << "TOKENISED EXPRESSION IS: ";
-	 	for(int i = 0; i < tokenisedExp.size(); i++) {
-			cout << tokenisedExp.at(i) << ',';
+	 	for(int j = 0; j < exp.tokens.size(); j++) {
+			cout << exp.tokens.at(j) << ',';
 		}
 		cout << endl;
 
- 		vector<string> postfixExp = infix2postfix(tokenisedExp);
+ 		exp.postfix = infix2postfix(exp.tokens);
 
  		cout << "POSTFIX IS: ";
- 		for(int i = 0; i < postfixExp.size(); i++) {
- 			cout << postfixExp.at(i) << ",";	
+ 		for(int k = 0; k < exp.postfix.size(); k++) {
+ 			cout << exp.postfix.at(k) << ",";	
  		}
  		cout << endl;
+
+		//cout << exp.name << " evaluation status in main is " << exp.isEval << endl;
+ 		evaluate(exp, expressions, expCount);
+ 		cout << "The answer is " << exp.ans << endl;
+ 		//cout << exp.name << " evaluation status main is " << exp.isEval << endl;
+ 		cout << endl;
+ 		i++;
  	}
 
 }
