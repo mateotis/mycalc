@@ -119,48 +119,24 @@ vector<string> tokenise(string infix) {
 				if(i < infix.length() - 2) { i = i + 2; continue; }
 				else { break; }				
 			}
-			else if(i == 0 && elem == '-' && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // Edge case for a negative number at the start (avoids the i-1 checks)
-				if(isdigit(infix.at(i+1))) {
-					exp.push_back("-");
-					//operand += elem;
-					//cout << i << " is a negative number." << endl;
-					if(i < infix.length() - 1) { i++; continue; }
-					else { break; }
-				}
-				else {
-					exp.push_back("-");
-					//var += elem;
-					//cout << i << " is a negative variable." << endl;
-					if(i < infix.length() - 1) { i++; continue; }
-					else { break; }
-				}				
+			else if(i == 0 && elem == '-' && isdigit(infix.at(i+1)) ) { // Edge case for a negative number at the start (avoids the i-1 checks)
+				operand += elem;
+				//cout << i << " is a negative number." << endl;
+				if(i < infix.length() - 1) { i++; continue; }
+				else { break; }
+				
 			}
-			else if(i != 0 && elem == '-' && isdigit(infix.at(i-1)) == 0 && isalpha(infix.at(i-1)) == 0 && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // When - is a negative marker instead of an operator
-				if(isdigit(infix.at(i+1))) {
-					exp.push_back("-");
-					//operand += elem;
-					//cout << i << " is a negative number." << endl;
-					if(i < infix.length() - 1) { i++; continue; }
-					else { break; }
-				}
-				else {
-					exp.push_back("-");
-					//var += elem;
-					//cout << i << " is a negative variable." << endl;
-					if(i < infix.length() - 1) { i++; continue; }
-					else { break; }
-				}
+			else if(i != 0 && elem == '-' && isdigit(infix.at(i-1)) == 0 && isdigit(infix.at(i+1)) ) { // When - is a negative marker instead of an operator
+				//exp.push_back("-");
+				operand += elem;
+				//cout << i << " is a negative number." << endl;
+				if(i < infix.length() - 1) { i++; continue; }
+				else { break; }
 			}
 			else { // All other operators
 				op += elem;
 				//cout << i << " is an operator." << endl;
-/*				if(op.length() > 2) {
-					string unaryOp = op.substr(op.length() - 2);
-					exp.push_back(unaryOp)
-					exp.push_back(op);
-					op = "";					
-				}*/
-				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || infix.at(i+1) == '(' || infix.at(i+1) == ')') {
+				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || infix.at(i+1) == '(' || infix.at(i+1) == ')' || infix.at(i+1) != elem) {
 					exp.push_back(op);
 					op = "";
 				}

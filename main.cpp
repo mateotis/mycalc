@@ -51,7 +51,7 @@ int main(int argc, char* args[]) {
 			int leftParNum = count(line.begin(), line.end(), '('); // Since we'll check whether the parentheses are properly paired
 			int rightParNum = count(line.begin(), line.end(), ')');
 
-			if(valueEnd != string::npos && nameEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.back() == ';' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks to ensure proper semicolon and equal sign placement
+			if(valueEnd != string::npos && nameEnd != string::npos && leftParNum == rightParNum && line.at(line.length() - 2) == ' ' && line.back() == ';' && line.at(nameEnd-1) == ' ' && line.at(nameEnd+1) == ' ') { // Sanity checks
 				for(int i = 0; i < nameEnd - 1; i++) { // Parses variable names
 					expName += line.at(i);
 				}
@@ -102,8 +102,16 @@ int main(int argc, char* args[]) {
 	for(int i = 0; i < invExps.size(); i++) { // Cleans out expressions that rely on invalid expressions
 		for(int j = 0; j < expressions.size(); j++) {
 			string expE = expressions.at(j).exp;
+			string lastChar(1, expE.back()); // To make sure there's no operator at the end
+			cout << lastChar << endl;
 			if(expE.find(invExps.at(i)) != string::npos) {
 				cout << "Expression " << expressions.at(j).name << " relies on an invalid expression. It will not be evaluated." << endl;
+				invExps.push_back(expressions.at(j).name); // To ensure all invalids are caught
+				expressions.erase(expressions.begin() + j);
+			}
+			else if(isOperator(lastChar)) {
+				cout << "Expression " << expressions.at(j).name << " has an operator at the end, which is invalid. It will not be evaluated." << endl;
+				invExps.push_back(expressions.at(j).name);
 				expressions.erase(expressions.begin() + j);
 			}
 		}
@@ -115,7 +123,6 @@ int main(int argc, char* args[]) {
 
 	for(int l = 0; l < expressions.size(); l++) { // Tokenises every expression and converts them to postfix
  		Expression& exp = expressions.at(l);
- 		//Expression expToTokenise = expressions.at(i);
  		exp.tokens = tokenise(exp.exp);
 
  		cout << "TOKENISED EXPRESSION IS: ";
