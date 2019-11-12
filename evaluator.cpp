@@ -22,10 +22,25 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 		//	a.	if the element is an operand push it to the stack
 
 		if(isOperator(elem) == false) { 
-			if(isalpha(elem.at(0))) { // We only need to check the first character: if that's a letter, we have a variable
+			if(isalpha(elem.at(0)) || (elem.at(0) == '-' && isalpha(elem.at(1))) ) { // We only need to check the first character: if that's a letter, we have a variable OR if we have a negative variable, we check the second character
 				for(int j = 0; j < expressions.size(); j++) {
+					if(elem.at(0) == '-') { // Special case for a negative variable to ensure accurate results fetch
+						//cout << "does this even work" << endl;
+						string elem2 = elem.substr(1, elem.length() - 1); // Cut the minus sign for the search
+						if(expressions.at(j).name == elem2) {
+							if(expressions.at(j).isEval == true) { // If the variable we need is already calculated, we can use it
+								float fElem = expressions.at(j).ans;
+								fElem = fElem * -1.0; // Applying the negation
+								myStack.push(fElem);
+								//cout << fElem << " is the value of variable " << expressions.at(j).name << endl;
+							}
+							else {
+								return;
+							}
+						}
+					}
 					//cout << expressions.at(j).name << endl;
-					if(expressions.at(j).name == elem) {
+					else if(expressions.at(j).name == elem) {
 						if(expressions.at(j).isEval == true) { // If the variable we need is already calculated, we can use it
 							float fElem = expressions.at(j).ans;
 							myStack.push(fElem);
@@ -39,7 +54,7 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 			}
 			else {
 			//convert string into float element
-				//cout << "Element to convert: " << elem << endl;
+				cout << "Element to convert: " << elem << endl;
 				float fElem = stof(elem);
 				myStack.push(fElem);
 			}
