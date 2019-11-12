@@ -39,7 +39,7 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 			}
 			else {
 			//convert string into float element
-				cout << "Element to convert: " << elem << endl;
+				//cout << "Element to convert: " << elem << endl;
 				float fElem = stof(elem);
 				myStack.push(fElem);
 			}

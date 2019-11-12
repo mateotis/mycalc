@@ -103,7 +103,7 @@ int main(int argc, char* args[]) {
 		for(int j = 0; j < expressions.size(); j++) {
 			string expE = expressions.at(j).exp;
 			string lastChar(1, expE.back()); // To make sure there's no operator at the end
-			cout << lastChar << endl;
+			//cout << lastChar << endl;
 			if(expE.find(invExps.at(i)) != string::npos) {
 				cout << "Expression " << expressions.at(j).name << " relies on an invalid expression. It will not be evaluated." << endl;
 				invExps.push_back(expressions.at(j).name); // To ensure all invalids are caught

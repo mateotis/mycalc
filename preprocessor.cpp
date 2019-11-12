@@ -12,13 +12,20 @@
 
 using namespace std;
 
-bool isOperator(string ch)
+bool isOperator(string ch) // Called during infix-to-postfix, hence it takes a string
 {
 	if( ch=="+" || ch=="-" || ch=="*" || ch=="/" || ch=="%" || ch=="//" || ch=="--" || ch=="++" || ch=="**")
 		return true;
 	else
 		return false;
 
+}
+
+bool isParentheses(char ch) { // Called only during tokenising, hence it takes a char
+	if(ch == ')' || ch == '(')
+		return true;
+	else
+		return false;
 }
 
 int convertOpToInt (string ch) // Method to help compare precedence
@@ -82,7 +89,7 @@ vector<string> tokenise(string infix) {
 			else { break; }			
 		}
 		
-		else if(elem == '(' || elem == ')') { // Parentheses
+		else if(isParentheses(elem)) { // Parentheses
 			//cout << i << " is a parentheses." << endl;
 			string paren(1, elem);
 			exp.push_back(paren);
@@ -113,7 +120,7 @@ vector<string> tokenise(string infix) {
 		}
 
 		else { // Operators of all kinds
-			if(elem == '-' && infix.at(i+1) == '-') { // Edge case for --
+			if(elem == '-' && infix.at(i+1) == '-' && infix.at(i+2) != '-') { // Edge case for --
 				//cout << i << " is a -- operator." << endl;
 				exp.push_back("--");
 				if(i < infix.length() - 2) { i = i + 2; continue; }
@@ -126,8 +133,9 @@ vector<string> tokenise(string infix) {
 				else { break; }
 				
 			}
-			else if(i != 0 && elem == '-' && isdigit(infix.at(i-1)) == 0 && isdigit(infix.at(i+1)) ) { // When - is a negative marker instead of an operator
+			else if(i != 0 && elem == '-' && isdigit(infix.at(i-1)) == 0 && isParentheses(infix.at(i-1)) == false && isdigit(infix.at(i+1)) && infix.at(i-1) != '-') { // When - is a negative marker instead of an operator
 				//exp.push_back("-");
+				cout << "in negative number loop" << endl;
 				operand += elem;
 				//cout << i << " is a negative number." << endl;
 				if(i < infix.length() - 1) { i++; continue; }
@@ -135,8 +143,17 @@ vector<string> tokenise(string infix) {
 			}
 			else { // All other operators
 				op += elem;
+				if(op.length() > 2) { // In case of three or more operators with the same character being next to each other: it splits them into unary and binary and adds them separately
+					string unaryOp = op.substr(op.length() - 2, 2);
+					string binaryOp = op.substr(0, op.length() - 2);
+					cout << "Binary op: " << binaryOp << endl << "Unary op: " << unaryOp << endl;
+					exp.push_back(binaryOp);
+					exp.push_back(unaryOp);
+					op = "";
+					if(i < infix.length() - 1) { i++; continue; }
+				}
 				//cout << i << " is an operator." << endl;
-				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || infix.at(i+1) == '(' || infix.at(i+1) == ')' || infix.at(i+1) != elem) {
+				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || isParentheses(infix.at(i+1)) || infix.at(i+1) != elem) {
 					exp.push_back(op);
 					op = "";
 				}
