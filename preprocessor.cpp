@@ -8,7 +8,6 @@
 #include<vector>
 
 #include "preprocessor.h"
-#include "evaluator.h"
 
 using namespace std;
 
@@ -28,7 +27,7 @@ bool isParentheses(char ch) { // Called only during tokenising, hence it takes a
 		return false;
 }
 
-int convertOpToInt (string ch) // Method to help compare precedence
+int convertOpToInt (string ch) // Helps compare precedence
 {
     if (ch=="+" || ch=="-") return 1;
     if (ch=="*" || ch=="/" || ch=="%" || ch=="//") return 2;
@@ -44,9 +43,9 @@ bool isleq(string opA, string opB) // Compares precedence and returns whether on
 vector<string> tokenise(string infix) {
 	vector<string> exp;
 
-	string operand = "";
+	string operand = ""; // Numbers
 	string op = ""; // "operator" is not a valid variable name, sadly
-	string var = "";
+	string var = ""; // Variable names
 
 	int i = 0;
 
@@ -62,7 +61,6 @@ vector<string> tokenise(string infix) {
 		if(i == infix.length() - 1) { // If we're on the last character, then we add it to the last unfinished token before returning
 			if(op != "") {
 				op += elem;
-				//cout << "Pushing " << op << " at the end" << endl;
 				exp.push_back(op);
 				return exp; 
 			}
@@ -85,13 +83,11 @@ vector<string> tokenise(string infix) {
 
 		// Otherwise, we head into tokenisation...
 		if(isspace(elem)) { // Filtering out whitespace
-			//cout << i << " is a space." << endl;
-			if(i < infix.length() - 1) { i++; continue; }
+			if(i < infix.length() - 1) { i++; continue; } // Boundary checks after every comparison ensures a smooth character-by-character movement to the end of the expression 
 			else { break; }			
 		}
 		
 		else if(isParentheses(elem)) { // Parentheses
-			//cout << i << " is a parentheses." << endl;
 			string paren(1, elem);
 			exp.push_back(paren);
 			if(i < infix.length() - 1) { i++; continue; }
@@ -99,7 +95,6 @@ vector<string> tokenise(string infix) {
 		}
 
 		else if(isalpha(elem)) { // Variables
-			//cout << i << " is a variable." << endl;
 			var += elem;
 			if(isalpha(infix.at(i+1)) == 0) {
 				exp.push_back(var);
@@ -110,10 +105,8 @@ vector<string> tokenise(string infix) {
 		}
 
 		else if(isdigit(elem)) { // Numbers
-			cout << i << " is a number." << endl;
 			operand += elem;
 			if(isdigit(infix.at(i+1)) == 0) {
-				//cout << "Pushing " << operand << endl;
 				exp.push_back(operand);
 				operand = "";
 			}
@@ -129,23 +122,18 @@ vector<string> tokenise(string infix) {
 				else { break; }	
 			}
 			else if(elem == '-' && infix.at(i+1) == '-' && infix.at(i+2) != '-') { // Edge case for --
-				cout << i << " is a -- operator." << endl;
 				exp.push_back("--");
 				if(i < infix.length() - 2) { i = i + 2; continue; }
 				else { break; }				
 			}
 			else if(i == 0 && elem == '-' && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) ) { // Edge case for a negative number at the start (avoids the i-1 checks)
 				if(isdigit(infix.at(i+1))) {
-					//exp.push_back("-");
 					operand += elem;
-					cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
-					//exp.push_back("-");
 					var += elem;
-					cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
@@ -153,16 +141,12 @@ vector<string> tokenise(string infix) {
 			}
 			else if(i != 0 && elem == '-' && infix.at(i-1) != ')' && isdigit(infix.at(i-1)) == 0 && isalpha(infix.at(i-1)) == 0 && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) && infix.at(i-1) != '-') { // When - is a negative marker instead of an operator
 				if(isdigit(infix.at(i+1))) { // The - is treated as part of the number/variable instead of a separate operator
-					//exp.push_back("-");
 					operand += elem;
-					cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
-					//exp.push_back("-");
 					var += elem;
-					cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
@@ -170,17 +154,16 @@ vector<string> tokenise(string infix) {
 			else { // All other operators
 				op += elem;
 				if(op.length() > 2) { // In case of three or more operators with the same character being next to each other: it splits them into unary and binary and adds them separately
-					string unaryOp = op.substr(op.length() - 2, 2);
-					string binaryOp = op.substr(0, op.length() - 2);
+					string unaryOp = op.substr(op.length() - 2, 2); // The unary operator (which always has two characters) comes second
+					string binaryOp = op.substr(0, op.length() - 2); // The binary operator (whatever is left after slicing off the unary) comes first
 					cout << "Binary op: " << binaryOp << endl << "Unary op: " << unaryOp << endl;
 					exp.push_back(binaryOp);
 					exp.push_back(unaryOp);
 					op = "";
 					if(i < infix.length() - 1) { i++; continue; }
 				}
-				cout << i << " is an operator." << endl;
-				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || isParentheses(infix.at(i+1)) || infix.at(i+1) != elem) {
-					//cout << "Pushing " << op << endl;
+				//cout << i << " is an operator." << endl;
+				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || isParentheses(infix.at(i+1)) || infix.at(i+1) != elem) { // These checks all mark the end of an operator
 					exp.push_back(op);
 					op = "";
 				}
@@ -190,49 +173,48 @@ vector<string> tokenise(string infix) {
 		}
 
 	}
-
 	return exp;
 }
 
 
-vector <string> infix2postfix(vector<string> infix) // Converts a tokenised infix expression to postfix
+vector <string> infix2postfix(vector<string> infix) // Converts a tokenised infix expression to postfix - working with a vector ensures that each part of the expression is treated separately and prioritised correctly
 {
-	stack <string> mystack;
+	stack <string> pfStack;
 	vector <string> postfix;
 
-	mystack.push("(");
+	pfStack.push("(");
 	infix.push_back(")");
 
-	while(!mystack.empty())
+	while(!pfStack.empty())
 	{
 		for(int j = 0; j < infix.size(); j++) 
 		{
-			if (isOperator(infix.at(j))== false && infix.at(j) != "(" && infix.at(j) != ")")
+			if (isOperator(infix.at(j))== false && infix.at(j) != "(" && infix.at(j) != ")") // If we have an operand, we add it to the postfix vector
 			{
 				postfix.push_back(infix.at(j));
 			}
-			else if (infix.at(j)=="(") 
+			else if (infix.at(j)=="(") // Same for the left bracket
 			{
-				mystack.push("(");
+				pfStack.push("(");
 			}
-			else if (isOperator(infix.at(j)))
+			else if (isOperator(infix.at(j))) // For operators, we pop and push based on precedence
 			{
-				while(isOperator(mystack.top()) && isleq(infix.at(j), mystack.top()))
+				while(isOperator(pfStack.top()) && isleq(infix.at(j), pfStack.top()))
 				{
-					postfix.push_back(mystack.top());
-					mystack.pop();
+					postfix.push_back(pfStack.top());
+					pfStack.pop();
 				}
 
-				mystack.push(infix.at(j));
+				pfStack.push(infix.at(j));
 			}
 			else if (infix.at(j)==")")
 			{
-				while(mystack.top() != "(")
+				while(pfStack.top() != "(") // With a left bracket, we pop until we find its right pair
 				{
-					postfix.push_back(mystack.top());
-					mystack.pop();
+					postfix.push_back(pfStack.top());
+					pfStack.pop();
 				}
-				mystack.pop();
+				pfStack.pop();
 			}
 		}
 		return postfix;

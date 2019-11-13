@@ -13,4 +13,6 @@ asd = al+(++aiz)+(**mik) ;
 fgh = -(8+4)-(-al*5) ;
 inv = moh-1 ;
 laa = inv+(++4)+ ;
-three = 3---2 ;
+haf = 3++211 ;
+nant = haf//2+1*(--fgh) ;
+val = 3%2 ;
