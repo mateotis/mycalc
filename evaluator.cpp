@@ -54,7 +54,7 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 			}
 			else {
 			//convert string into float element
-				cout << "Element to convert: " << elem << endl;
+				//cout << "Element to convert: " << elem << endl;
 				float fElem = stof(elem);
 				myStack.push(fElem);
 			}
@@ -114,6 +114,19 @@ void evaluate(Expression& exp, vector<Expression>& expressions, int& expCount)	/
 		}
 	}
 	//3. return the value from the top of the stack (i.e. the final answer)
+/*	if(myStack.size() > 1) {
+		for(int j = 0; j < expressions.size(); j++) {
+			if(expressions.at(j).name == exp.name) {
+				expressions.erase(expressions.begin() + j);
+				cout << "Stacked stack. Ambiguous expression?" << endl;
+				break;
+			}
+		}
+		expCount--;
+		cout << "does it finish?" << endl;
+		
+		return;
+	}*/
 	exp.isEval = true;
 	exp.ans = myStack.top();
 	expCount--;

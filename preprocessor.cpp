@@ -62,6 +62,7 @@ vector<string> tokenise(string infix) {
 		if(i == infix.length() - 1) { // If we're on the last character, then we add it to the last unfinished token before returning
 			if(op != "") {
 				op += elem;
+				//cout << "Pushing " << op << " at the end" << endl;
 				exp.push_back(op);
 				return exp; 
 			}
@@ -109,9 +110,10 @@ vector<string> tokenise(string infix) {
 		}
 
 		else if(isdigit(elem)) { // Numbers
-			//cout << i << " is a number." << endl;
+			cout << i << " is a number." << endl;
 			operand += elem;
 			if(isdigit(infix.at(i+1)) == 0) {
+				//cout << "Pushing " << operand << endl;
 				exp.push_back(operand);
 				operand = "";
 			}
@@ -120,8 +122,14 @@ vector<string> tokenise(string infix) {
 		}
 
 		else { // Operators of all kinds
-			if(elem == '-' && infix.at(i+1) == '-' && infix.at(i+2) != '-') { // Edge case for --
-				//cout << i << " is a -- operator." << endl;
+			if(elem == '-' && infix.at(i+1) == '-' && infix.at(i+2) == '-') { // Edge case for --- (converts it to - and --)
+				exp.push_back("-");
+				exp.push_back("--");
+				if(i < infix.length() - 3) { i = i + 3; continue; }
+				else { break; }	
+			}
+			else if(elem == '-' && infix.at(i+1) == '-' && infix.at(i+2) != '-') { // Edge case for --
+				cout << i << " is a -- operator." << endl;
 				exp.push_back("--");
 				if(i < infix.length() - 2) { i = i + 2; continue; }
 				else { break; }				
@@ -130,31 +138,31 @@ vector<string> tokenise(string infix) {
 				if(isdigit(infix.at(i+1))) {
 					//exp.push_back("-");
 					operand += elem;
-					//cout << i << " is a negative number." << endl;
+					cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
 					//exp.push_back("-");
 					var += elem;
-					//cout << i << " is a negative variable." << endl;
+					cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				
 			}
 			else if(i != 0 && elem == '-' && infix.at(i-1) != ')' && isdigit(infix.at(i-1)) == 0 && isalpha(infix.at(i-1)) == 0 && (isdigit(infix.at(i+1)) || isalpha(infix.at(i+1))) && infix.at(i-1) != '-') { // When - is a negative marker instead of an operator
-				if(isdigit(infix.at(i+1))) {
+				if(isdigit(infix.at(i+1))) { // The - is treated as part of the number/variable instead of a separate operator
 					//exp.push_back("-");
 					operand += elem;
-					//cout << i << " is a negative number." << endl;
+					cout << i << " is a negative number." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
 				else {
 					//exp.push_back("-");
 					var += elem;
-					//cout << i << " is a negative variable." << endl;
+					cout << i << " is a negative variable." << endl;
 					if(i < infix.length() - 1) { i++; continue; }
 					else { break; }
 				}
@@ -170,8 +178,9 @@ vector<string> tokenise(string infix) {
 					op = "";
 					if(i < infix.length() - 1) { i++; continue; }
 				}
-				//cout << i << " is an operator." << endl;
+				cout << i << " is an operator." << endl;
 				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || isParentheses(infix.at(i+1)) || infix.at(i+1) != elem) {
+					//cout << "Pushing " << op << endl;
 					exp.push_back(op);
 					op = "";
 				}
