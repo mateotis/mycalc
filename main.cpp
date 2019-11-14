@@ -52,8 +52,7 @@ int main(int argc, char* args[]) {
 
 	vector<Expression> expressions; // A vector to store all input expressions
 	vector<string> invExps; // Here we store invalid expression names, which we will use after parsing to remove invalids from the expressions list
-	vector<string> expVariables; // Storing all variables occuring in all the expressions, also for sanity checking purposes	
-
+	
 	ifstream fin(inputFile);
 	if (fin.is_open()) { // Parsing begins
 		string line;
