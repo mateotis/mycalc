@@ -40,7 +40,7 @@ bool isleq(string opA, string opB) // Compares precedence and returns whether on
 	return (convertOpToInt(opA)<=convertOpToInt(opB));
 }
 
-vector<string> tokenise(string infix) {
+vector<string> tokenise(string infix, string name, vector<Expression>& expressions, vector<string>& invExps) {
 	vector<string> exp;
 
 	string operand = ""; // Numbers
@@ -71,7 +71,15 @@ vector<string> tokenise(string infix) {
 			}
 			else if(var != "") {
 				var += elem;
-				exp.push_back(var); 
+				bool varIsPresent = false;
+				for(int i = 0; i < expressions.size(); i ++) { // Wr're looking whether the variable we just found is the name of any expression
+					if(expressions.at(i).name == var) { // If it is, then it's cool
+						varIsPresent = true;
+						break;
+					}
+				}
+				if(!varIsPresent) { invExps.push_back(name); } // If it's not, then this very expression is invalid - we'll take care of it soon
+				exp.push_back(var); // But for now, we let the program continue
 				return exp; 
 			}
 			else { // If it's none of these, it's a parentheses
@@ -97,6 +105,14 @@ vector<string> tokenise(string infix) {
 		else if(isalpha(elem)) { // Variables
 			var += elem;
 			if(isalpha(infix.at(i+1)) == 0) {
+				bool varIsPresent = false;
+				for(int i = 0; i < expressions.size(); i ++) {
+					if(expressions.at(i).name == var) {
+						varIsPresent = true;
+						break;
+					}
+				}
+				if(!varIsPresent) { invExps.push_back(name); }
 				exp.push_back(var);
 				var = "";
 			}
@@ -156,13 +172,12 @@ vector<string> tokenise(string infix) {
 				if(op.length() > 2) { // In case of three or more operators with the same character being next to each other: it splits them into unary and binary and adds them separately
 					string unaryOp = op.substr(op.length() - 2, 2); // The unary operator (which always has two characters) comes second
 					string binaryOp = op.substr(0, op.length() - 2); // The binary operator (whatever is left after slicing off the unary) comes first
-					cout << "Binary op: " << binaryOp << endl << "Unary op: " << unaryOp << endl;
 					exp.push_back(binaryOp);
 					exp.push_back(unaryOp);
 					op = "";
 					if(i < infix.length() - 1) { i++; continue; }
 				}
-				//cout << i << " is an operator." << endl;
+
 				if(isalpha(infix.at(i+1)) || isdigit(infix.at(i+1)) || isspace(infix.at(i+1)) || isParentheses(infix.at(i+1)) || infix.at(i+1) != elem) { // These checks all mark the end of an operator
 					exp.push_back(op);
 					op = "";

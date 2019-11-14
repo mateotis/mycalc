@@ -13,6 +13,20 @@
 
 using namespace std;
 
+void invalidFilter(vector<Expression>& expressions, vector<string>& invExps) { // Cleans out expressions that are invalid or rely on invalid expressions
+
+	for(int i = 0; i < invExps.size(); i++) {
+		for(int j = 0; j < expressions.size(); j++) {
+			string expE = expressions.at(j).name + " = " + expressions.at(j).exp; // For readability; we are looking at the entire expression (name and value) to catch all invalids
+			if(expE.find(invExps.at(i)) != string::npos) { // If we find an invalid variable in an expression, we remove that expression
+				cout << "Expression " << expressions.at(j).name << " relies on an invalid expression. It will not be evaluated." << endl;
+				invExps.push_back(expressions.at(j).name); // To ensure the loop runs until all invalids are caught
+				expressions.erase(expressions.begin() + j);
+			}
+		}
+	}
+}
+
 int main(int argc, char* args[]) {
 
 	string inputFile = ""; // This is a mandatory fill
@@ -38,7 +52,8 @@ int main(int argc, char* args[]) {
 
 	vector<Expression> expressions; // A vector to store all input expressions
 	vector<string> invExps; // Here we store invalid expression names, which we will use after parsing to remove invalids from the expressions list
-	
+	vector<string> expVariables; // Storing all variables occuring in all the expressions, also for sanity checking purposes	
+
 	ifstream fin(inputFile);
 	if (fin.is_open()) { // Parsing begins
 		string line;
@@ -63,7 +78,7 @@ int main(int argc, char* args[]) {
 					expValue += line.at(j);
 					string expChar = "";
 					expChar += line.at(j);
-					if((isOperator(expChar) && line.at(j+1) == ')')) { // Further sanity check (to make sure we don't have an operator right before a closing bracket)
+					if((isOperator(expChar) && line.at(j+1) == ')') && expValue.length() > 1) { // Further sanity check (to make sure we don't have an operator right before a closing bracket)
 						cout << "Invalid syntax on line " << lineCount << " for expression " << expName << ". Expression will not be evaluated. Reason for error: operator right before closing parentheses." << endl;
 						invExps.push_back(expName);
 						expName = "";
@@ -71,7 +86,17 @@ int main(int argc, char* args[]) {
 					}
 				}
 
-				if(expName != "" && expValue != "") { // To weed out still-valid expressions
+				if(expName != "" && expValue != "") {
+					string lastChar(1, expValue.back());
+					if(isOperator(lastChar) || lastChar == "(") { // Sanity check for having an operator or a left parentheses at the end
+						cout << "Invalid syntax on line " << lineCount << " for expression " << expName << ". Expression will not be evaluated. Reason for error: operator or left parentheses at the end." << endl;
+						invExps.push_back(expName);
+						expName = "";
+						expValue = "";
+					}
+				}
+
+				if(expName != "" && expValue != "") { // To weed out the previously detected invalid expressions
 					vector<string> startingTokens; // Placeholder vectors for tokenised and postfix expressions
 					vector<string> startingPostfix;
 					Expression expr1 = {expName, expValue, startingTokens, startingPostfix, 0, false};
@@ -113,30 +138,17 @@ int main(int argc, char* args[]) {
 		return EXIT_SUCCESS;
 	}
 
-	for(int i = 0; i < invExps.size(); i++) { // Cleans out expressions that rely on invalid expressions
-		for(int j = 0; j < expressions.size(); j++) {
-			string expE = expressions.at(j).exp; // For readability
-			string lastChar(1, expE.back()); // To make sure there's no operator at the end
-			if(expE.find(invExps.at(i)) != string::npos) { // If we find an invalid variable in an expression, we remove that expression
-				cout << "Expression " << expressions.at(j).name << " relies on an invalid expression. It will not be evaluated." << endl;
-				invExps.push_back(expressions.at(j).name); // To ensure all invalids are caught
-				expressions.erase(expressions.begin() + j);
-			}
-			else if(isOperator(lastChar)) { // Sanity check for having an operator at the end
-				cout << "Expression " << expressions.at(j).name << " has an operator at the end, which is invalid. It will not be evaluated." << endl;
-				invExps.push_back(expressions.at(j).name);
-				expressions.erase(expressions.begin() + j);
-			}
-		}
-	}
+	invalidFilter(expressions, invExps); // First run of the filter - takes care of invalid expressions discovered during parsing
 
 	for(int l = 0; l < expressions.size(); l++) { // Tokenises every expression and converts them to postfix
  		Expression& exp = expressions.at(l);
 
- 		exp.tokens = tokenise(exp.exp);
+ 		exp.tokens = tokenise(exp.exp, exp.name, expressions, invExps);
 
  		exp.postfix = infix2postfix(exp.tokens);
  	}
+
+ 	invalidFilter(expressions, invExps); // Second run of the filter - takes care of invalids discovered during tokenisation
 
 	int expCount = expressions.size(); // Count of remaining expressions to be evaluated
 	int i = 0;
