@@ -79,6 +79,7 @@ vector<string> tokenise(string infix, string name, vector<Expression>& expressio
 					}
 				}
 				if(!varIsPresent) { invExps.push_back(name); } // If it's not, then this very expression is invalid - we'll take care of it soon
+				if(var == name) { invExps.push_back(name); } // Checks for self-assignment, which would lead to an infinite loop
 				exp.push_back(var); // But for now, we let the program continue
 				return exp; 
 			}
@@ -112,6 +113,7 @@ vector<string> tokenise(string infix, string name, vector<Expression>& expressio
 						break;
 					}
 				}
+				if(var == name) { invExps.push_back(name); }
 				if(!varIsPresent) { invExps.push_back(name); }
 				exp.push_back(var);
 				var = "";
